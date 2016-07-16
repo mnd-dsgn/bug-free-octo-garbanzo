@@ -12,12 +12,8 @@ class BattleBot
   end
 
   def dead?
-    if @health <= 0
-      @@count -= 1
-      true 
-    else
-      false
-    end
+    return true if @health <= 0
+    false
   end
 
   def has_weapon?
@@ -27,25 +23,31 @@ class BattleBot
 
   def pick_up(weapon)
     raise ArgumentError unless weapon.is_a?(Weapon)
-    @weapon = weapon unless @weapon
+    raise ArgumentError if weapon.bot != nil
+    unless @weapon 
+      weapon.bot = self
+      @weapon = weapon 
+    end
   end
 
   def drop_weapon
-    @weapon = nil
     @weapon.bot = nil
+    @weapon = nil
   end
 
   def take_damage(val) 
-    raise Exception unless val.is_a?(Fixnum)
+    raise ArgumentError unless val.is_a?(Fixnum)
     @health -= val
     if @health <= 0
+      puts "This bot has died."
+      @@count -= 1
       @health = 0
     end
     return @health
   end
 
   def heal 
-    unless dead?
+    unless self.dead?
       @health += 10 
       @health = 100 if @health > 100
       @health 
@@ -56,6 +58,7 @@ class BattleBot
     raise ArgumentError unless enemy.is_a?(BattleBot)
     raise ArgumentError if enemy == self
     raise ArgumentError unless @weapon
+    enemy.receive_attack_from(self)
   end
 
   def receive_attack_from(enemy) 
@@ -68,9 +71,8 @@ class BattleBot
   end
 
   def defend_against(enemy)
-    dead?
-    has_weapon?
-    if has_weapon? && !dead 
+    self.dead?
+    if has_weapon?  && !dead?
       attack(enemy)
     end
   end

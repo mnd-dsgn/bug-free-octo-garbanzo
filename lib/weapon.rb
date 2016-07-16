@@ -4,17 +4,27 @@ class Weapon
 
   attr_accessor :bot
 
-  def initialize(name, damage = nil)
+  def initialize(name, damage = 5)
+    raise ArgumentError unless name.is_a? String
+    raise ArgumentError unless damage.is_a? Fixnum
+    @damage = damage
     @name = name
-    raise ArgumentError unless name.is_a?(String)
-    raise ArgumentError unless damage.is_a?(Fixnum)
-    @damage = damage if damage
     @bot = nil
   end
 
-  def name=(n) 
-    @name
+  def bot=(x) 
+    if (x.is_a? BattleBot) || (x.nil?)
+      @bot = x
+    else
+      raise ArgumentError 
+    end
   end
+
+  def picked_up?
+    return true if @bot
+    return false
+  end
+
 
 
 end
